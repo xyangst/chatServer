@@ -31,7 +31,7 @@ function setup() {
   submitButton.position(25 + textInput.width, 20);
   submitButton.mousePressed(sendMessage);
 
-  socket = io.connect('process.env.HOST');
+  socket = io.connect("https://chatserver-dershreder.onrender.com/");
   socket.on('message',
     function (data) {
       Text += data += "\n";
