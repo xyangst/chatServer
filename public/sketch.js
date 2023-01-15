@@ -31,7 +31,7 @@ function setup() {
   submitButton.position(25 + textInput.width, 20);
   submitButton.mousePressed(sendMessage);
 
-  socket = io.connect('process.env.PORT');
+  socket = io.connect('process.env.HOST');
   socket.on('message',
     function (data) {
       Text += data += "\n";
