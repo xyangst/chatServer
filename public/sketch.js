@@ -7,7 +7,7 @@
 let submitButton;
 let textInput;
 let chatBox;
-let TimeSinceLast = 0;
+let TimeSinceLast = 1000;
 let Text = "";
 let rainbow = {
   hue: 0,
@@ -22,6 +22,9 @@ let rainbow = {
   }
 }
 function setup() {
+  function btnMessage() {
+    sendMessage()
+  }
   colorMode(HSB)
   createCanvas(windowWidth, windowHeight);
   background(0);
@@ -29,15 +32,17 @@ function setup() {
   textInput = createInput('');
   textInput.position(20, 20);
   submitButton.position(25 + textInput.width, 20);
-  submitButton.mousePressed(sendMessage);
+  submitButton.mousePressed(btnMessage);
 
   socket = io.connect("https://chatserver-dershreder.onrender.com/");
+ // socket = io.connect('http://localhost:3000');
   socket.on('message',
     function (data) {
       Text += data += "\n";
     }
   );
-
+  if (localStorage.getItem("name") == undefined) { localStorage.setItem("name", "Guest#" + floor(100 + random(899))) }
+  sendMessage("/name " + localStorage.getItem("name"))
 }
 function draw() {
 
@@ -54,9 +59,10 @@ function draw() {
   TimeSinceLast - 1000 > 0 ? submitButton.style('background-color', "green") : submitButton.style('background-color', "red  ")
   submitButton.html(floor(constrain(1000 - TimeSinceLast, 0, 1000)))
 }
-function sendMessage() {
-  if (TimeSinceLast < 1000 || textInput.value() == "") { return }
-  switch (textInput.value()) {
+function sendMessage(msg = textInput.value()) {
+  if (typeof msg !== 'string') return;
+  if (TimeSinceLast < 1000 || msg == "") { return }
+  switch (msg) {
     case "/clear":
       Text = ""
       break;
@@ -64,15 +70,19 @@ function sendMessage() {
       rainbow.toggle = !rainbow.toggle;
       break;
     default:
-      if (textInput.value().slice(0, 14) == "/rainbowSpeed ") {
-        rainbow.speed = +textInput.value().slice(14)
+      if (msg.slice(0, 14) == "/rainbowSpeed ") {
+        rainbow.speed = +msg.slice(14)
 
         break;
       }
-      socket.emit('message', textInput.value());
+      if (msg.slice(0, 6) == "/name ") {
+        localStorage.setItem("name", msg.slice(6, 16))
+      }
+      socket.emit('message', msg);
       TimeSinceLast = 0;
       break;
   }
   textInput.value("")
 }
+
 

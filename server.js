@@ -18,12 +18,11 @@ io.sockets.on('connection',
 
   // We are given a websocket object in our function
   function (socket) {
-
-    socket.lastMessage = Date.now()
+    const clientIp = socket.request.socket.remoteAddress;
+    console.log(`A client connected with IP: ${clientIp}`);
+    socket.lastMessage = 0;
     socket._Name = "User#" + Math.floor(Math.random() * 9000 + 1000)
     console.log("We have a new client: " + socket.conn.remoteAddress + " " + socket.id);
-
-    // When this user emits, client side: socket.emit('otherevent',some data);
     socket.on('message',
       function (data) {
         if (Date.now() - socket.lastMessage < 1000 || data == "") {
@@ -35,7 +34,7 @@ io.sockets.on('connection',
           socket._Name = data.slice(6, 17);
         } else {
           let message = currentTime() + " " + socket._Name + ": " + data;
-          writeToFile("messages.txt", message)
+         // writeToFile("messages.txt", message)
           io.sockets.emit('message', message);
         }
 
